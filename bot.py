@@ -58,6 +58,7 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     from app import app
     
     telegram_id = str(update.effective_user.id)
+    user_first_name = update.effective_user.first_name
     
     with app.app_context():
         # Check if user is already registered
@@ -65,7 +66,7 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         
         if existing_user:
             await update.message.reply_text(
-                "You're already registered! Use /help to see available commands."
+                f"You're already registered as {existing_user.username}! Use /help to see available commands."
             )
             return
         
@@ -79,10 +80,12 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         db.session.commit()
         
         await update.message.reply_text(
-            "You've been registered successfully!\n\n"
-            "To complete your setup, please:\n"
-            "1. Use /connect_calendar to link your Google Calendar\n"
-            "2. Visit our website to complete your profile"
+            f"You've been registered successfully, {user_first_name}!\n\n"
+            f"Your Telegram ID is: {telegram_id}\n"
+            f"Please remember this ID to complete your web registration.\n\n"
+            f"To complete your setup, please:\n"
+            f"1. Use /connect_calendar to link your Google Calendar\n"
+            f"2. Visit our website and click 'Register' to complete your profile with this Telegram ID"
         )
 
 
