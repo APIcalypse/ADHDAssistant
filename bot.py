@@ -619,6 +619,11 @@ def initialize_bot(token):
     # Start the Bot in a separate thread
     def start_polling():
         if application is not None:
+            import asyncio
+            # Create a new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            # Run the bot with the new event loop
             application.run_polling(stop_signals=None)
         else:
             logger.error("Cannot start polling: application is None")
