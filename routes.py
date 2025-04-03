@@ -62,8 +62,24 @@ def register():
     if form.validate_on_submit():
         telegram_id = form.telegram_id.data
         
+        # Add debug logging
+        logger.debug(f"Looking for user with telegram_id: '{telegram_id}'")
+        logger.debug(f"User data in DB: {User.query.all()}")
+        
         # Check if user with this Telegram ID exists
         existing_user = User.query.filter_by(telegram_id=telegram_id).first()
+        
+        # Also try with string comparison
+        if not existing_user:
+            logger.debug("First query failed, trying to fetch all users and compare manually")
+            all_users = User.query.all()
+            for user in all_users:
+                logger.debug(f"Comparing: DB '{user.telegram_id}' vs Input '{telegram_id}'")
+                if str(user.telegram_id) == str(telegram_id):
+                    existing_user = user
+                    logger.debug(f"Found match by string comparison!")
+                    break
+        
         if not existing_user:
             flash('No user found with this Telegram ID. Please register with the bot first using /register command.', 'danger')
             return render_template('register.html', form=form)
