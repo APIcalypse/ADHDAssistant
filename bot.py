@@ -42,6 +42,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "/start - Start the bot\n"
         "/help - Show this help message\n"
         "/register - Register your account\n"
+        "/change_username - Change your username (can be used only once)\n"
         "/connect_calendar - Connect Google Calendar\n"
         "/add_task - Add a new task\n"
         "/list_tasks - List all your tasks\n"
@@ -86,6 +87,65 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             f"To complete your setup, please:\n"
             f"1. Use /connect_calendar to link your Google Calendar\n"
             f"2. Visit our website and click 'Register' to complete your profile with this Telegram ID"
+        )
+
+
+async def change_username(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Allow user to change their username once."""
+    from app import app
+    
+    telegram_id = str(update.effective_user.id)
+    
+    with app.app_context():
+        # Check if user is registered
+        user = User.query.filter_by(telegram_id=telegram_id).first()
+        
+        if not user:
+            await update.message.reply_text(
+                "You need to register first! Use /register to get started."
+            )
+            return
+            
+        # Check if username has been changed from the default format
+        if not user.username.startswith("user_"):
+            await update.message.reply_text(
+                f"You've already changed your username to '{user.username}'. This command can only be used once."
+            )
+            return
+            
+        # Check if arguments are provided
+        if not context.args:
+            await update.message.reply_text(
+                "Please provide a new username. For example:\n"
+                "/change_username YourNewUsername"
+            )
+            return
+            
+        new_username = context.args[0]
+        
+        # Validate username (3-64 characters, alphanumeric and underscores)
+        if not (3 <= len(new_username) <= 64) or not all(c.isalnum() or c == '_' for c in new_username):
+            await update.message.reply_text(
+                "Invalid username. Please use 3-64 characters with only letters, numbers, and underscores."
+            )
+            return
+            
+        # Check if username is already taken
+        existing_user = User.query.filter_by(username=new_username).first()
+        if existing_user and existing_user.id != user.id:
+            await update.message.reply_text(
+                "This username is already taken. Please choose a different one."
+            )
+            return
+            
+        # Update username
+        old_username = user.username
+        user.username = new_username
+        db.session.commit()
+        
+        await update.message.reply_text(
+            f"Username successfully changed from '{old_username}' to '{new_username}'!\n\n"
+            f"You can now use this username to log in on the web dashboard."
         )
 
 
@@ -606,6 +666,7 @@ def initialize_bot(token):
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("register", register))
+    application.add_handler(CommandHandler("change_username", change_username))
     application.add_handler(CommandHandler("connect_calendar", connect_calendar))
     application.add_handler(CommandHandler("add_task", add_task))
     application.add_handler(CommandHandler("list_tasks", list_tasks))

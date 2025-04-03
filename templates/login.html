@@ -19,10 +19,21 @@
                         {% with messages = get_flashed_messages(with_categories=true) %}
                             {% if messages %}
                                 {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
+                                    {% if 'Registration completed' in message %}
+                                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                            <h4 class="alert-heading">Registration Complete! 🎉</h4>
+                                            <p>{{ message }}</p>
+                                            <p class="mb-0">Your account is now ready to use. Please log in with your credentials.</p>
+                                            <hr>
+                                            <p class="mb-0 small">You'll also receive a confirmation message on Telegram.</p>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                            {{ message }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    {% endif %}
                                 {% endfor %}
                             {% endif %}
                         {% endwith %}

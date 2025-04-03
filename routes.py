@@ -106,10 +106,40 @@ def register():
         except Exception as e:
             logger.error(f"Error syncing user to Supabase: {e}")
         
-        # Log the user in
-        login_user(existing_user)
-        flash('Registration completed successfully! Welcome to your dashboard.', 'success')
-        return redirect(url_for('dashboard'))
+        # Instead of logging the user in, redirect to login page with a success message
+        flash('Registration completed successfully! Please log in with your new account.', 'success')
+        
+        # Also try to send a Telegram notification to the user
+        try:
+            from bot import application
+            if application:
+                # Use application to send message to telegram user
+                import asyncio
+                from telegram import Bot
+                
+                async def send_message():
+                    bot = Bot(token=os.environ.get("TELEGRAM_TOKEN"))
+                    await bot.send_message(
+                        chat_id=existing_user.telegram_id,
+                        text=f"✅ Your web registration is complete!\n\n"
+                             f"You can now login to your dashboard using:\n"
+                             f"Username: {existing_user.username}\n\n"
+                             f"Remember to use the password you created during registration."
+                    )
+                
+                # Run the async function in a new event loop
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    loop.run_until_complete(send_message())
+                    loop.close()
+                except Exception as e:
+                    logger.error(f"Error sending Telegram notification: {e}")
+        except Exception as e:
+            logger.error(f"Could not send Telegram notification: {e}")
+            
+        # Redirect to login page
+        return redirect(url_for('login'))
     
     return render_template('register.html', form=form)
 
