@@ -20,4 +20,5 @@ dependencies = [
     "python-telegram-bot>=22.0",
     "telegram>=0.0.1",
     "flask-wtf>=1.2.2",
+    "wtforms>=3.2.1",
 ]

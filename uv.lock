@@ -1146,6 +1146,7 @@ dependencies = [
     { name = "supabase" },
     { name = "telegram" },
     { name = "werkzeug" },
+    { name = "wtforms" },
 ]
 
 [package.metadata]
@@ -1166,6 +1167,7 @@ requires-dist = [
     { name = "supabase", specifier = ">=2.15.0" },
     { name = "telegram", specifier = ">=0.0.1" },
     { name = "werkzeug", specifier = ">=3.1.3" },
+    { name = "wtforms", specifier = ">=3.2.1" },
 ]
 
 [[package]]
