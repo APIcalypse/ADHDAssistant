@@ -50,6 +50,11 @@ def index():
     """Home page route."""
     return render_template('index.html')
 
+@app.errorhandler(404)
+def page_not_found(e):
+    """Handle 404 errors by returning to index"""
+    return render_template('index.html'), 200
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
